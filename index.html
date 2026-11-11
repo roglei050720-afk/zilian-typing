@@ -655,8 +655,8 @@ function updateCaret(){
   var r=sp.getBoundingClientRect(), fr=flow.getBoundingClientRect();
   var left=r.left-fr.left, top=r.top-fr.top, h=r.height;
   if(S.typed.length>=charSpans.length) left=r.right-fr.left-1;
-  caret.style.left=left+'px';
-  caret.style.top=(top+2)+'px';
+  caret.style.left=(left+flow.offsetLeft)+'px';
+  caret.style.top=(top+flow.offsetTop+2)+'px';
   caret.style.height=Math.max(14,h-4)+'px';
   caret.style.opacity='1';
 
@@ -672,8 +672,8 @@ function updateCaret(){
 }
 
 function placeComp(left,top){
-  comp.style.left=Math.max(2,Math.min(left,panel.clientWidth-160))+'px';
-  comp.style.top=Math.max(2,top-30)+'px';
+  comp.style.left=Math.max(2,Math.min(left+flow.offsetLeft,panel.clientWidth-160))+'px';
+  comp.style.top=Math.max(2,top+flow.offsetTop-30)+'px';
 }
 
 /* ===================== 统计 ===================== */
