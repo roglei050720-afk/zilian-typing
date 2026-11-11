@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>字炼 · 自定义打字练习</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232A5F57'/%3E%3Cpath d='M9 11h14M16 11v12M10 23h12' stroke='%23F4F6F1' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  color-scheme: light;
+  --bg:#ECEEE9;
+  --surface:#F7F8F4;
+  --surface2:#E2E6DF;
+  --raised:#FFFFFF;
+  --ink:#151B17;
+  --dim:#75807A;
+  --faint:#909890;
+  --line:#D3D9D2;
+  --accent:#2A5F57;
+  --accent-ink:#F2F6F1;
+  --accent-soft:#DCE7E1;
+  --bad:#AF3F2A;
+  --bad-soft:#EFD9D2;
+  --sans:system-ui,-apple-system,"Segoe UI","PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;
+  --mono:ui-monospace,"SFMono-Regular","Cascadia Mono",Consolas,"Noto Sans Mono CJK SC","Microsoft YaHei",monospace;
+  --serif:Georgia,"Songti SC","Noto Serif SC","Times New Roman",serif;
+}
+html[data-theme="dark"]{
+  color-scheme: dark;
+  --bg:#0A100D;
+  --surface:#111815;
+  --surface2:#19221E;
+  --raised:#2A3730;
+  --ink:#E7EAE2;
+  --dim:#6C786F;
+  --faint:#5A645D;
+  --line:#242E29;
+  --accent:#8ABFAE;
+  --accent-ink:#08110D;
+  --accent-soft:#1B2C26;
+  --bad:#DA6D53;
+  --bad-soft:#2C1B16;
+}
+html,body{margin:0;min-height:100%}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:var(--sans);font-size:15px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;font-kerning:normal;
+  transition:background .2s,color .2s;
+}
+button{font:inherit;color:inherit}
+.wrap{max-width:900px;margin:0 auto;padding:18px 14px 22px;display:flex;flex-direction:column;gap:13px;min-height:100vh}
+
+/* ---------- header ---------- */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:baseline;gap:9px;min-width:0}
+.mark{font-family:var(--serif);font-size:25px;font-weight:600;letter-spacing:.10em;line-height:1.1}
+.tag{font-size:12px;color:var(--dim);letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tools{display:flex;gap:6px;flex:0 0 auto}
+.icon-btn{
+  width:38px;height:38px;display:grid;place-items:center;padding:0;
+  background:transparent;border:1px solid var(--line);border-radius:6px;
+  color:var(--dim);cursor:pointer;transition:color .15s,border-color .15s,background .15s;
+}
+.icon-btn:hover{color:var(--ink);border-color:var(--dim)}
+.icon-btn:active{background:var(--surface2)}
+.icon-btn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- controls ---------- */
+.controls{display:flex;flex-direction:column;gap:7px;min-width:0}
+.ctrl-row{display:flex;gap:7px;align-items:center;min-width:0;flex-wrap:wrap;padding-bottom:2px}
+.ctrl-row::-webkit-scrollbar{display:none}
+.seg{display:inline-flex;gap:2px;padding:3px;background:var(--surface2);border-radius:7px;flex:0 0 auto}
+.seg button{
+  border:0;background:transparent;border-radius:5px;padding:6px 10px;min-height:30px;
+  font-size:13px;color:var(--dim);cursor:pointer;transition:background .15s,color .15s;white-space:nowrap;
+}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--raised);color:var(--ink);font-weight:500}
+.split{flex:0 0 auto;width:1px;height:22px;background:var(--line)}
+.src{
+  flex:0 0 auto;border:1px solid var(--line);background:transparent;border-radius:6px;
+  padding:6px 11px;min-height:32px;font-size:13px;color:var(--dim);cursor:pointer;white-space:nowrap;
+  transition:color .15s,border-color .15s,background .15s;
+}
+.src:hover{color:var(--ink);border-color:var(--dim)}
+.src[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.src.custom{border-style:dashed}
+
+/* ---------- stage ---------- */
+.stage{position:relative}
+.panel{
+  position:relative;background:var(--surface);border:1px solid var(--line);border-radius:3px;
+  padding:20px 18px;height:clamp(180px,42vh,340px);overflow-y:auto;cursor:text;
+  transition:border-color .2s,opacity .2s;
+  scrollbar-width:none;
+}
+.panel::-webkit-scrollbar{display:none}
+.panel:focus-within{border-color:#B9C2BB}
+html[data-theme="dark"] .panel:focus-within{border-color:#3A473F}
+.cmark{position:absolute;width:8px;height:8px;pointer-events:none;opacity:.45}
+.cmark::before,.cmark::after{content:"";position:absolute;background:var(--faint)}
+.cmark::before{width:8px;height:1px}
+.cmark::after{width:1px;height:8px}
+.cmark.tl{left:-4px;top:-4px}
+.cmark.tr{right:-4px;top:-4px}
+.cmark.tr::before{right:0}.cmark.tr::after{right:0}
+.cmark.bl{left:-4px;bottom:-4px}
+.cmark.bl::before{bottom:0}.cmark.bl::after{bottom:0}
+.cmark.br{right:-4px;bottom:-4px}
+.cmark.br::before{right:0;bottom:0}.cmark.br::after{right:0;bottom:0}
+
+.flow{
+  font-family:var(--mono);
+  font-size:clamp(16px,3.6vw,19px);
+  line-height:1.95;
+  letter-spacing:.015em;
+  white-space:pre-wrap;
+  word-break:break-word;
+  -webkit-user-select:none;user-select:none;
+  transition:filter .25s,opacity .25s;
+}
+.flow.cn{font-size:clamp(18px,4.2vw,23px);letter-spacing:.045em;line-height:2.02}
+.flow .w{display:inline-block}
+.ch{color:var(--faint);transition:color .06s,background .12s}
+.ch.ok{color:var(--ink)}
+.ch.bad{color:var(--bad);background:var(--bad-soft);border-radius:2px}
+.ch.cur{color:var(--dim)}
+.stage.blurred .flow{filter:blur(3.5px);opacity:.55}
+
+.caret{
+  position:absolute;width:2px;border-radius:1px;background:var(--accent);
+  pointer-events:none;opacity:0;animation:blink 1.1s infinite;
+}
+@keyframes blink{0%,46%{opacity:1}54%,100%{opacity:0}}
+
+.ghost{
+  position:absolute;left:0;top:0;width:2px;height:1.3em;margin:0;padding:0;
+  border:0;outline:none;resize:none;overflow:hidden;
+  background:transparent;color:transparent;caret-color:transparent;
+  font-size:16px;opacity:.01;z-index:3;
+}
+.comp{
+  position:absolute;z-index:4;max-width:220px;
+  padding:3px 7px;border-radius:4px;background:var(--surface2);border:1px solid var(--line);
+  font-family:var(--mono);font-size:13px;color:var(--dim);
+  opacity:0;transform:translateY(3px);transition:opacity .12s,transform .12s;pointer-events:none;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.comp.on{opacity:1;transform:none}
+.veil{
+  position:absolute;left:50%;bottom:12px;transform:translateX(-50%);
+  padding:5px 11px;border-radius:5px;background:var(--surface);border:1px solid var(--line);
+  font-size:12.5px;color:var(--dim);pointer-events:none;
+  opacity:0;transition:opacity .15s;white-space:nowrap;
+}
+.stage.blurred .veil{opacity:1}
+
+/* ---------- progress + stats ---------- */
+.progress{height:2px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .1s linear}
+
+.board{display:flex;flex-direction:column;gap:12px}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 16px}
+.stat{display:flex;align-items:baseline;gap:6px;min-width:0}
+.stat label{font-size:11.5px;letter-spacing:.09em;color:var(--dim);flex:0 0 auto;min-width:34px}
+.stat b{
+  font-family:var(--mono);font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1.2;
+}
+.stat i{font-style:normal;font-size:11px;color:var(--faint);white-space:nowrap}
+.actions{display:flex;gap:7px;flex-wrap:wrap}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  min-height:38px;padding:0 13px;border:1px solid var(--line);border-radius:6px;
+  background:var(--surface);color:var(--ink);font-size:13.5px;cursor:pointer;
+  transition:border-color .15s,background .15s,opacity .15s;
+}
+.btn:hover{border-color:var(--dim)}
+.btn:active{background:var(--surface2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{opacity:.92}
+.btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.hint{font-size:11.5px;color:var(--faint);letter-spacing:.02em;line-height:1.7}
+
+/* ---------- sheets ---------- */
+.scrim{
+  position:fixed;inset:0;z-index:30;background:rgba(10,16,13,.38);
+  opacity:0;pointer-events:none;transition:opacity .2s;
+  backdrop-filter:blur(1.5px);
+}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:31;
+  max-height:86vh;overflow-y:auto;
+  background:var(--bg);border-top:1px solid var(--line);border-radius:16px 16px 0 0;
+  padding:16px 16px 26px;
+  transform:translateY(102%);transition:transform .28s cubic-bezier(.32,.72,0,1);
+  box-shadow:0 -14px 44px rgba(0,0,0,.16);
+}
+.sheet.on{transform:none}
+@media (min-width:768px){
+  .sheet{left:auto;right:14px;bottom:14px;width:412px;border:1px solid var(--line);border-radius:10px;max-height:82vh}
+}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}
+.sheet-head h2{font-size:15px;font-weight:600;margin:0;letter-spacing:.04em}
+.sheet-head .sub{font-size:11.5px;color:var(--dim);display:block;margin-top:3px;letter-spacing:0;font-weight:400}
+.close{
+  width:34px;height:34px;display:grid;place-items:center;padding:0;flex:0 0 auto;
+  background:transparent;border:1px solid var(--line);border-radius:6px;color:var(--dim);cursor:pointer;
+}
+.close:hover{color:var(--ink);border-color:var(--dim)}
+.close svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round}
+
+.field{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.field > label{font-size:12px;color:var(--dim);letter-spacing:.07em}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .name{font-size:13.5px}
+.row .name span{display:block;font-size:11.5px;color:var(--dim);margin-top:2px}
+textarea.input{
+  width:100%;min-height:150px;resize:vertical;padding:11px 12px;
+  border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);
+  font-family:var(--sans);font-size:16px;line-height:1.7;outline:none;
+}
+textarea.input:focus{border-color:var(--accent)}
+.meta{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;color:var(--dim)}
+.meta em{font-style:normal;font-variant-numeric:tabular-nums}
+.mini-seg{display:inline-flex;gap:2px;padding:3px;background:var(--surface2);border-radius:7px;flex:0 0 auto}
+.mini-seg button{border:0;background:transparent;border-radius:5px;padding:5px 9px;font-size:12.5px;color:var(--dim);cursor:pointer;min-height:28px}
+.mini-seg button[aria-pressed="true"]{background:var(--raised);color:var(--ink)}
+.saved{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.saved-item{
+  display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--line);border-radius:5px;
+  background:var(--surface);min-height:38px;
+}
+.saved-item .nm{flex:1;min-width:0;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.saved-item .nm:hover{color:var(--accent)}
+.saved-item .del{border:0;background:transparent;color:var(--faint);cursor:pointer;padding:3px;display:grid;place-items:center}
+.saved-item .del:hover{color:var(--bad)}
+.saved-item .del svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round}
+.empty{font-size:12px;color:var(--faint);padding:6px 0}
+
+/* ---------- result ---------- */
+.result{
+  position:fixed;z-index:32;left:50%;top:50%;
+  width:min(430px,calc(100vw - 22px));max-height:88vh;overflow-y:auto;
+  background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  padding:20px 18px;box-shadow:0 26px 64px rgba(0,0,0,.24);
+  opacity:0;pointer-events:none;transform:translate(-50%,-50%) scale(.97);
+  transition:opacity .2s,transform .24s cubic-bezier(.32,.72,0,1);
+}
+.result.on{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+.r-kicker{font-size:11.5px;letter-spacing:.16em;color:var(--dim);margin-bottom:10px}
+.r-speed{display:flex;align-items:baseline;gap:8px;margin-bottom:2px}
+.r-speed b{font-family:var(--mono);font-size:44px;line-height:1;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.r-speed span{font-size:12px;color:var(--dim);letter-spacing:.06em}
+.r-note{font-size:12px;color:var(--dim);margin-bottom:16px}
+.r-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px 14px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.r-grid .cell label{display:block;font-size:11.5px;color:var(--dim);letter-spacing:.07em}
+.r-grid .cell b{font-family:var(--mono);font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
+.r-grid .cell i{font-style:normal;font-size:11px;color:var(--faint);margin-left:3px}
+.chartbox{margin:16px 0 4px}
+.chartbox svg{width:100%;height:auto;display:block}
+.chart-cap{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:4px}
+.r-actions{display:flex;gap:7px;margin-top:14px;flex-wrap:wrap}
+.r-actions .btn{flex:1 1 auto}
+
+/* ---------- history ---------- */
+.hist-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.hist-row:last-child{border-bottom:0}
+.hist-row .d{flex:1;min-width:0;color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist-row b{font-family:var(--mono);font-size:15px;font-variant-numeric:tabular-nums}
+.hist-row .a{font-family:var(--mono);color:var(--dim);font-variant-numeric:tabular-nums}
+
+/* ---------- toast ---------- */
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,10px);z-index:40;
+  padding:8px 14px;border-radius:6px;background:var(--ink);color:var(--surface);
+  font-size:12.5px;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;
+  max-width:calc(100vw - 32px);
+}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media (min-width:768px){
+  .wrap{padding:26px 24px 30px;gap:15px}
+  .mark{font-size:29px}
+  .panel{padding:26px 26px;height:clamp(220px,40vh,380px)}
+  .stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .board{flex-direction:row;align-items:flex-end;justify-content:space-between;gap:20px}
+  .stats{flex:1}
+  .actions{flex:0 0 auto}
+  .ctrl-row{gap:9px}
+}
+@media (max-width:370px){
+  .tag{display:none}
+  .stat b{font-size:17px}
+}
+@media (prefers-reduced-motion:reduce){
+  .caret{animation:none;opacity:1}
+  .sheet{transition:none}
+  .result{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="mark">字炼</span>
+      <span class="tag">打字练习 · 自定义文本</span>
+    </div>
+    <div class="tools">
+      <button class="icon-btn" id="btnTheme" title="切换浅色 / 深色" aria-label="切换主题">
+        <svg viewBox="0 0 24 24" id="icoTheme"><circle cx="12" cy="12" r="4.2"/><path d="M12 3v2.2M12 18.8v2.2M3 12h2.2M18.8 12h2.2M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8L5.6 18.4"/></svg>
+      </button>
+      <button class="icon-btn" id="btnHistory" title="练习记录" aria-label="练习记录">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.6v4.8l3.2 1.9"/></svg>
+      </button>
+      <button class="icon-btn" id="btnSettings" title="设置" aria-label="设置">
+        <svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <section class="controls">
+    <div class="ctrl-row">
+      <div class="seg" id="timeSeg" role="group" aria-label="练习时长">
+        <button data-time="0">不限时</button>
+        <button data-time="15">15 秒</button>
+        <button data-time="30">30 秒</button>
+        <button data-time="60">60 秒</button>
+        <button data-time="120">120 秒</button>
+      </div>
+      <span class="split" aria-hidden="true"></span>
+      <button class="src custom" id="btnCustom" aria-pressed="false">自定义文本</button>
+    </div>
+    <div class="ctrl-row" id="srcRow" role="group" aria-label="练习素材"></div>
+  </section>
+
+  <main class="stage" id="stage">
+    <div class="panel" id="panel">
+      <div class="flow" id="flow"></div>
+      <textarea id="ta" class="ghost" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="输入区域"></textarea>
+      <span class="caret" id="caret" aria-hidden="true"></span>
+      <div class="comp" id="comp" aria-hidden="true"></div>
+    </div>
+    <span class="cmark tl" aria-hidden="true"></span>
+    <span class="cmark tr" aria-hidden="true"></span>
+    <span class="cmark bl" aria-hidden="true"></span>
+    <span class="cmark br" aria-hidden="true"></span>
+    <div class="veil" id="veil">已暂停 · 点击此处继续</div>
+  </main>
+
+  <div class="progress" aria-hidden="true"><i id="pbar"></i></div>
+
+  <section class="board">
+    <div class="stats">
+      <div class="stat"><label>速度</label><b id="sSpeed">0</b><i id="sUnit">WPM</i></div>
+      <div class="stat"><label>准确率</label><b id="sAcc">—</b><i>%</i></div>
+      <div class="stat"><label>时间</label><b id="sTime">0</b><i id="sTimeUnit">秒</i></div>
+      <div class="stat"><label>字符</label><b id="sCount">0</b><i id="sTotal">/ 0</i></div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="btnRestart">
+        <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4.6v4.2h-4.2"/></svg>
+        重来
+      </button>
+      <button class="btn" id="btnNext">
+        <svg viewBox="0 0 24 24"><path d="M4 12h13M13 6.6l5.4 5.4-5.4 5.4"/></svg>
+        换一段
+      </button>
+    </div>
+  </section>
+
+  <footer class="hint">Tab 重新开始 · 单击文本区域聚焦 · 自定义文本支持粘贴与导入 .txt · 练习记录保存在本机</footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+
+<!-- ===== 面板：自定义文本 ===== -->
+<section class="sheet" id="sheetText" aria-hidden="true">
+  <div class="sheet-head">
+    <div>
+      <h2>自定义文本</h2>
+      <span class="sub">粘贴任意内容，中文按字计时，英文按词计速</span>
+    </div>
+    <button class="close" data-close="sheetText" aria-label="关闭"><svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+  </div>
+  <div class="field">
+    <label for="customTa">练习内容</label>
+    <textarea class="input" id="customTa" placeholder="在这里粘贴文章、单词表、代码或台词……"></textarea>
+    <div class="meta"><span>超过 1200 字将只取前 1200 字</span><em id="customCount">0 字</em></div>
+  </div>
+  <div class="field">
+    <div class="actions">
+      <button class="btn primary" id="btnStartCustom">
+        <svg viewBox="0 0 24 24"><path d="M7 4.8l12 7.2-12 7.2z"/></svg>
+        开始练习
+      </button>
+      <button class="btn" id="btnSaveText">存为素材</button>
+      <label class="btn" for="fileIn" style="cursor:pointer">导入 .txt
+        <input type="file" id="fileIn" accept=".txt,text/plain" hidden>
+      </label>
+    </div>
+  </div>
+  <div class="field" style="margin-bottom:0">
+    <label>已保存的素材</label>
+    <div class="saved" id="savedList"></div>
+  </div>
+</section>
+
+<!-- ===== 面板：设置 ===== -->
+<section class="sheet" id="sheetSet" aria-hidden="true">
+  <div class="sheet-head">
+    <div>
+      <h2>设置</h2>
+      <span class="sub">修改后立即生效，记录保存在本机</span>
+    </div>
+    <button class="close" data-close="sheetSet" aria-label="关闭"><svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+  </div>
+  <div class="row">
+    <div class="name">输入模式<span>自动识别可处理中英混排</span></div>
+    <div class="mini-seg" data-key="forceMode">
+      <button data-v="auto">自动</button>
+      <button data-v="cn">中文</button>
+      <button data-v="en">英文</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="name">错误处理<span>「必须修正」时打错会被拦下</span></div>
+    <div class="mini-seg" data-key="strict">
+      <button data-v="0">可跳过</button>
+      <button data-v="1">必须修正</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="name">按键音<span>敲击时发出轻微声响</span></div>
+    <div class="mini-seg" data-key="sound">
+      <button data-v="0">关</button>
+      <button data-v="1">开</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="name">字号</div>
+    <div class="mini-seg" data-key="size">
+      <button data-v="std">标准</button>
+      <button data-v="big">大</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="name">练习记录<span>清空后无法恢复</span></div>
+    <button class="btn" id="btnClearHist" style="min-height:32px;padding:0 11px;font-size:12.5px">清空记录</button>
+  </div>
+</section>
+
+<!-- ===== 面板：记录 ===== -->
+<section class="sheet" id="sheetHist" aria-hidden="true">
+  <div class="sheet-head">
+    <div>
+      <h2>练习记录</h2>
+      <span class="sub" id="histSub">最近 30 次</span>
+    </div>
+    <button class="close" data-close="sheetHist" aria-label="关闭"><svg viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8"/></svg></button>
+  </div>
+  <div id="histBody"></div>
+</section>
+
+<!-- ===== 面板：结果 ===== -->
+<div class="result" id="result" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="r-kicker">练习完成</div>
+  <div class="r-speed"><b id="rSpeed">0</b><span id="rUnit">WPM</span></div>
+  <div class="r-note" id="rNote">—</div>
+  <div class="r-grid">
+    <div class="cell"><label>准确率</label><b id="rAcc">0</b><i>%</i></div>
+    <div class="cell"><label>用时</label><b id="rTime">0</b><i>秒</i></div>
+    <div class="cell"><label>正确字符</label><b id="rChars">0</b><i>个</i></div>
+    <div class="cell"><label>错误</label><b id="rErr">0</b><i>次</i></div>
+  </div>
+  <div class="chartbox"><svg id="rChart" viewBox="0 0 520 120" preserveAspectRatio="none"></svg>
+    <div class="chart-cap"><span>速度走势</span><span id="rPeak">最高 0</span></div>
+  </div>
+  <div class="r-actions">
+    <button class="btn primary" id="btnAgain">再练一遍</button>
+    <button class="btn" id="btnOther">换一段</button>
+    <button class="btn" id="btnCloseResult">关闭</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+'use strict';
+
+var $=function(s,r){return (r||document).querySelector(s);};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+
+var MAX_CHARS=1200;
+
+/* ===================== 素材 ===================== */
+var SOURCES=[
+  {id:'cn-short',label:'中文短文',items:[
+    '清晨六点，巷口的豆浆铺先醒过来。铁锅上的热气一团团往上浮，把对街那盏路灯裹成了毛边。老板娘把第一屉包子摆上案板，喊了一嗓子，声音穿过半条街，落进还没睡醒的窗子里。有人披着外套下楼，接过纸袋，指尖被烫得缩了一下，又笑着攥紧。',
+    '旧书店开在二楼，楼梯窄得只容一人。推门进去，先闻到纸和灰的味道，再听见电扇慢慢转的声响。靠墙的书架一直顶到天花板，书脊颜色深浅不一，像一排没排整齐的砖。店主趴在柜台后看书，头也不抬，只说一句：随便翻，翻坏了算我的。',
+    '雨是午后忽然落下来的，先前没有半点预兆。屋檐下的水很快连成一条线，砸在青石板上，散成一朵朵小白花。行人挤在骑楼的廊下，谁也不说话，只看着雨。半个时辰后云散开，日头出来，水汽从地面往上蒸，整条街像刚从水里捞出来。',
+    '上山的路走到一半，雾就漫过来了。石阶湿滑，两侧的竹子被风推得轻轻磕在一起。转过第三个弯，看见一间矮屋，门口摆着几张矮凳，炉上坐着水。老人递来一只粗瓷杯，茶汤浅黄，喝下去先是苦，过一会儿，舌根慢慢回甘。'
+  ]},
+  {id:'cn-long',label:'中文长段',items:[
+    '城市的夜不是一下子黑下来的。先是写字楼的灯一层层熄灭，然后是街边的店铺拉下卷帘门，最后只剩下便利店和二十四小时药店还亮着。末班公交从站台缓缓开走，车厢里空得能听见报站的声音。加班的人靠在窗边，手机屏幕的光落在脸上，映出一小片蓝色。路面上的热气还没有散干净，路灯把树影投在墙上，一动不动，像一张搁了很久的照片。',
+    '做一只木碗，先要选料。纹理要顺，节疤要少，阴干两年以上才不会开裂。木料上了车床，刀口一点一点往里进，木屑像卷曲的花瓣落下来，带着一股清苦的香。粗坯成形之后是打磨，从粗砂到细砂，一遍一遍，手上的力气越来越轻。最后上油，用棉布反复擦，木头的光泽是擦出来的，不是抹上去的。一只碗要费三天工夫，可它可以用上三十年。'
+  ]},
+  {id:'en-words',label:'英文常用词',items:[
+    'the be to of and a in that have it for not on with he as you do at this by from or one had but what all were when we there can an said each which she how their if will up other about out them then some her into time has look two more write go see number no way could people my than first water been call who its now find long down day did get come made new sound take just only over think also back after use how our work well even want because any these give most us',
+    'light water paper window street morning coffee story garden river letter winter summer market finger table chair music color number people little letter quickly simple matter follow reason second minute travel season shadow circle answer honest gather listen bright narrow gentle'
+  ]},
+  {id:'en-quote',label:'英文名句',items:[
+    "It was the best of times, it was the worst of times, it was the age of wisdom, it was the age of foolishness, it was the epoch of belief, it was the epoch of incredulity.",
+    "To be, or not to be, that is the question: whether 'tis nobler in the mind to suffer the slings and arrows of outrageous fortune, or to take arms against a sea of troubles.",
+    "It is a truth universally acknowledged, that a single man in possession of a good fortune, must be in want of a wife.",
+    "Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal.",
+    "Call me Ishmael. Some years ago, never mind how long precisely, having little or no money in my purse, and nothing particular to interest me on shore, I thought I would sail about a little and see the watery part of the world."
+  ]},
+  {id:'code',label:'代码片段',items:[
+    'function debounce(fn, wait) { let timer = null; return function (...args) { clearTimeout(timer); timer = setTimeout(() => fn.apply(this, args), wait); }; }',
+    '.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; padding: 24px; border-radius: 8px; } .grid > .cell { min-width: 0; overflow: hidden; text-overflow: ellipsis; }',
+    'def parse_rows(path): rows = [] with open(path, encoding="utf-8") as f: for line in f: line = line.strip() if not line or line.startswith("#"): continue rows.append(line.split("\\t")) return rows'
+  ]},
+  {id:'num',label:'数字符号',items:[
+    'Order #A5729 shipped on 2024-03-11; qty 1,280 units at $0.42 each, total $537.60 (VAT 7.5% excluded). Ref: INV-20240311-0092 / batch B-17.',
+    '本季度共交付订单 1,286 笔，同比增长 23.7%，平均客单价 412 元，退货率 3.2%，复购率 41.5%，客诉响应时长中位数 4.8 小时。'
+  ]}
+];
+
+/* ===================== 存储 ===================== */
+var KEY={set:'zilian.settings',texts:'zilian.texts',hist:'zilian.history'};
+var store={
+  get:function(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},
+  set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+};
+var DEFAULTS={theme:'auto',forceMode:'auto',strict:false,sound:false,size:'std'};
+var settings=Object.assign({},DEFAULTS,store.get(KEY.set,{})||{});
+var savedTexts=store.get(KEY.texts,[])||[];
+var history=store.get(KEY.hist,[])||[];
+
+/* ===================== 元素 ===================== */
+var panel=$('#panel'), stage=$('#stage'), flow=$('#flow'), ta=$('#ta'),
+    caret=$('#caret'), comp=$('#comp'), pbar=$('#pbar'), scrim=$('#scrim');
+
+/* ===================== 状态 ===================== */
+var S={
+  raw:'', typed:'', origin:'', mode:'en', source:null, sLabel:'',
+  keys:0, errs:0, correct:0,
+  startAt:0, pauseAt:0, paused:false, finished:false,
+  limit:60, samples:[], elapsed:0
+};
+var charSpans=[], timerId=null, lastTick=0, composing=false, openSheetName=null, toastTimer=null;
+
+/* ===================== 工具 ===================== */
+function detectMode(t){
+  if(settings.forceMode!=='auto') return settings.forceMode;
+  var cjk=0,i,c;
+  for(i=0;i<t.length;i++){
+    c=t.charCodeAt(i);
+    if((c>=0x4e00&&c<=0x9fff)||(c>=0x3400&&c<=0x4dbf)||(c>=0xf900&&c<=0xfaff)) cjk++;
+  }
+  var latin=(t.match(/[A-Za-z]/g)||[]).length;
+  if(cjk===0) return 'en';
+  return cjk*2>=latin ? 'cn' : 'en';
+}
+
+function normalize(t,mode){
+  var s=String(t).replace(/\r\n?/g,'\n');
+  if(mode==='cn'){ s=s.replace(/[\s\u00a0]+/g,''); }
+  else { s=s.replace(/[\s\u00a0]+/g,' ').replace(/^\s+|\s+$/g,''); }
+  if(s.length>MAX_CHARS){
+    s=s.slice(0,MAX_CHARS);
+    if(mode==='en'){ var cut=s.lastIndexOf(' '); if(cut>MAX_CHARS*0.6) s=s.slice(0,cut); }
+  }
+  return s;
+}
+
+function calcSpeed(correctChars,ms){
+  var min=ms/60000;
+  if(min<=0.0001) return 0;
+  return S.mode==='cn' ? correctChars/min : (correctChars/5)/min;
+}
+
+function elapsedMs(){
+  if(!S.startAt) return 0;
+  var end=S.paused?S.pauseAt:performance.now();
+  return Math.max(0,end-S.startAt);
+}
+
+function toast(msg){
+  var t=$('#toast');
+  t.textContent=msg;
+  t.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove('on');},2200);
+}
+
+/* ===================== 渲染 ===================== */
+function buildDom(){
+  flow.innerHTML='';
+  charSpans=[];
+  var isEn=S.mode==='en';
+  flow.classList.toggle('cn',!isEn);
+  var group=null,i,sp,c;
+  for(i=0;i<S.raw.length;i++){
+    c=S.raw.charAt(i);
+    sp=document.createElement('span');
+    sp.className='ch'+(c===' '?' sp':'');
+    sp.setAttribute('data-sp',c===' '?'1':'0');
+    sp.setAttribute('data-st','');
+    sp.textContent=(c===' '?'\u00a0':c);
+    charSpans.push(sp);
+    if(isEn){
+      if(!group){group=document.createElement('span');group.className='w';flow.appendChild(group);}
+      group.appendChild(sp);
+      if(c===' ') group=null;
+    }else{
+      flow.appendChild(sp);
+    }
+  }
+}
+
+function paint(){
+  var t=S.typed, cur=t.length, correct=0, i, sp, st;
+  for(i=0;i<charSpans.length;i++){
+    sp=charSpans[i]; st='';
+    if(i<cur){
+      if(t.charAt(i)===S.raw.charAt(i)){ st='ok'; correct++; }
+      else st='bad';
+    }else if(i===cur && !S.finished){
+      st='cur';
+    }
+    if(sp.getAttribute('data-st')!==st){
+      sp.setAttribute('data-st',st);
+      sp.className='ch'+(sp.getAttribute('data-sp')==='1'?' sp':'')+(st?' '+st:'');
+    }
+  }
+  S.correct=correct;
+  updateCaret();
+}
+
+function updateCaret(){
+  if(S.finished||!charSpans.length){
+    caret.style.opacity='0';
+    return;
+  }
+  var idx=Math.min(S.typed.length,charSpans.length-1);
+  var sp=charSpans[idx];
+  if(!sp){caret.style.opacity='0';return;}
+  var r=sp.getBoundingClientRect(), fr=flow.getBoundingClientRect();
+  var left=r.left-fr.left, top=r.top-fr.top, h=r.height;
+  if(S.typed.length>=charSpans.length) left=r.right-fr.left-1;
+  caret.style.left=left+'px';
+  caret.style.top=(top+2)+'px';
+  caret.style.height=Math.max(14,h-4)+'px';
+  caret.style.opacity='1';
+
+  ta.style.left=(flow.offsetLeft+left)+'px';
+  ta.style.top=(top+flow.offsetTop)+'px';
+  ta.style.height=Math.max(14,h-4)+'px';
+
+  var pr=panel.getBoundingClientRect();
+  if(r.bottom>pr.bottom-10) panel.scrollTop+=(r.bottom-pr.bottom)+26;
+  else if(r.top<pr.top+10) panel.scrollTop-=(pr.top-r.top)+26;
+
+  if(comp.classList.contains('on')) placeComp(left,top);
+}
+
+function placeComp(left,top){
+  comp.style.left=Math.max(2,Math.min(left,panel.clientWidth-160))+'px';
+  comp.style.top=Math.max(2,top-30)+'px';
+}
+
+/* ===================== 统计 ===================== */
+function updateStats(){
+  var el=elapsedMs(), typed=S.typed.length, total=S.raw.length;
+  var speed=el>0?calcSpeed(S.correct,el):0;
+
+  $('#sSpeed').textContent = el>1200?String(Math.round(speed)):'0';
+  $('#sUnit').textContent = S.mode==='cn'?'字/分':'WPM';
+
+  if(S.keys>0){
+    var acc=(S.keys-S.errs)/S.keys*100;
+    $('#sAcc').textContent=(Math.round(acc*10)/10).toFixed(1);
+  }else{
+    $('#sAcc').textContent='—';
+  }
+
+  var shown = S.limit>0 ? Math.max(0,Math.ceil(S.limit-el/1000)) : Math.floor(el/1000);
+  $('#sTime').textContent=String(shown);
+  $('#sTimeUnit').textContent=S.limit>0?'秒余':'秒';
+  $('#sCount').textContent=String(typed);
+  $('#sTotal').textContent='/ '+total;
+}
+
+function setProgress(p){
+  pbar.style.width=Math.max(0,Math.min(100,p*100))+'%';
+}
+
+/* ===================== 计时 ===================== */
+function tick(){
+  if(!S.startAt||S.finished||S.paused) return;
+  var el=elapsedMs();
+  if(el-lastTick>=1000){
+    lastTick=el;
+    S.samples.push({t:el/1000,v:Math.round(calcSpeed(S.correct,el))});
+    if(S.samples.length>90) S.samples.shift();
+  }
+  if(S.limit>0 && el>=S.limit*1000){ finish('time'); return; }
+  updateStats();
+}
+
+function startTimer(){
+  if(timerId) return;
+  timerId=setInterval(tick,100);
+}
+
+function stopTimer(){
+  if(timerId){clearInterval(timerId);timerId=null;}
+}
+
+/* ===================== 输入 ===================== */
+function commit(v){
+  if(!S.raw||S.finished) return;
+  v=v==null?'':String(v);
+  var target=S.raw, prev=S.typed, i;
+  if(v.length>target.length) v=v.slice(0,target.length);
+
+  var base=0;
+  if(v.length>=prev.length && v.lastIndexOf(prev,0)===0) base=prev.length;
+
+  var k=0, er=0;
+  for(i=base;i<v.length;i++){
+    k++;
+    if(v.charAt(i)!==target.charAt(i)) er++;
+  }
+  S.keys+=k; S.errs+=er;
+
+  if(settings.strict){
+    var m=-1;
+    for(i=0;i<v.length;i++){
+      if(v.charAt(i)!==target.charAt(i)){m=i;break;}
+    }
+    if(m>=0) v=v.slice(0,m);
+  }
+
+  S.typed=v;
+  ta.value=v;
+  try{ ta.setSelectionRange(v.length,v.length); }catch(e){}
+
+  if(!S.startAt && v.length>0){
+    S.startAt=performance.now();
+    lastTick=0;
+    startTimer();
+  }
+
+  paint();
+  updateStats();
+  setProgress(target.length?v.length/target.length:0);
+
+  if(S.correct+S.errs>=0 && v.length>=target.length) finish('done');
+}
+
+function showPending(p){
+  if(!p){ comp.classList.remove('on'); return; }
+  comp.textContent=p;
+  comp.classList.add('on');
+  var idx=Math.min(S.typed.length,charSpans.length-1);
+  var sp=charSpans[idx];
+  if(sp){
+    var r=sp.getBoundingClientRect(), fr=flow.getBoundingClientRect();
+    placeComp(r.left-fr.left, r.top-fr.top);
+  }
+}
+
+function hidePending(){ comp.classList.remove('on'); }
+
+/* ===================== 结束 ===================== */
+function finish(reason){
+  if(S.finished) return;
+  S.finished=true;
+  var el;
+  if(reason==='time') el=S.limit*1000;
+  else el=Math.max(1000,elapsedMs());
+  S.elapsed=el;
+  stopTimer();
+  var speed=calcSpeed(S.correct,el);
+  var acc=S.keys?((S.keys-S.errs)/S.keys*100):100;
+  var prevBest=bestFor(S.mode);
+
+  caret.style.opacity='0';
+  paint();
+  updateStats();
+  ta.blur();
+  stage.classList.remove('blurred');
+
+  var entry={
+    ts:Date.now(),
+    mode:S.mode,
+    label:S.sLabel,
+    speed:Math.round(speed),
+    acc:Math.round(acc*10)/10,
+    chars:S.correct,
+    errs:S.errs,
+    sec:Math.round(el/1000)
+  };
+  history.unshift(entry);
+  if(history.length>30) history.length=30;
+  store.set(KEY.hist,history);
+
+  showResult(entry,prevBest);
+}
+
+function bestFor(mode){
+  var best=0,i;
+  for(i=0;i<history.length;i++){
+    if(history[i].mode===mode && history[i].speed>best) best=history[i].speed;
+  }
+  return best;
+}
+
+function showResult(e,prevBest){
+  var unit=S.mode==='cn'?'字/分':'WPM';
+  $('#rSpeed').textContent=String(e.speed);
+  $('#rUnit').textContent=unit;
+  $('#rAcc').textContent=(Math.round(e.acc*10)/10).toFixed(1);
+  $('#rTime').textContent=String(e.sec);
+  $('#rChars').textContent=String(e.chars);
+  $('#rErr').textContent=String(e.errs);
+
+  var note=e.label;
+  if(prevBest>0){
+    note += e.speed>=prevBest ? ' · 刷新了个人纪录' : ' · 个人纪录 '+prevBest+' '+unit;
+  }else{
+    note += ' · 首次记录';
+  }
+  $('#rNote').textContent=note;
+
+  drawChart();
+  $('#result').classList.add('on');
+  $('#result').setAttribute('aria-hidden','false');
+  scrim.classList.add('on');
+}
+
+function hideResult(){
+  $('#result').classList.remove('on');
+  $('#result').setAttribute('aria-hidden','true');
+  if(!openSheetName) scrim.classList.remove('on');
+}
+
+function drawChart(){
+  var svg=$('#rChart'), W=520, H=120, P=10;
+  var s=S.samples.slice();
+  if(!s.length) s=[{t:0,v:0},{t:1,v:Math.round(S.correct?calcSpeed(S.correct,S.elapsed):0)}];
+  if(s.length===1) s.push({t:s[0].t+1,v:s[0].v});
+
+  var maxT=1, maxV=10, i;
+  for(i=0;i<s.length;i++){ if(s[i].t>maxT) maxT=s[i].t; if(s[i].v>maxV) maxV=s[i].v; }
+  maxV=Math.ceil(maxV*1.15/10)*10;
+
+  var x=function(t){return P+(W-2*P)*(t/maxT);};
+  var y=function(v){return H-P-(H-2*P)*(v/maxV);};
+
+  var px=[],py=[];
+  for(i=0;i<s.length;i++){px.push(x(s[i].t));py.push(y(s[i].v));}
+
+  var line='M'+px[0].toFixed(1)+' '+py[0].toFixed(1);
+  for(i=1;i<px.length;i++) line+=' L'+px[i].toFixed(1)+' '+py[i].toFixed(1);
+
+  var area='M'+px[0].toFixed(1)+' '+(H-P)+' L'+px[0].toFixed(1)+' '+py[0].toFixed(1);
+  for(i=1;i<px.length;i++) area+=' L'+px[i].toFixed(1)+' '+py[i].toFixed(1);
+  area+=' L'+px[px.length-1].toFixed(1)+' '+(H-P)+' Z';
+
+  svg.innerHTML=
+    '<defs><linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">'+
+      '<stop offset="0" style="stop-color:var(--accent);stop-opacity:.28"/>'+
+      '<stop offset="1" style="stop-color:var(--accent);stop-opacity:0"/>'+
+    '</linearGradient></defs>'+
+    '<line x1="'+P+'" y1="'+(H-P)+'" x2="'+(W-P)+'" y2="'+(H-P)+'" style="stroke:var(--line);stroke-width:1"/>'+
+    '<path d="'+area+'" fill="url(#areaGrad)" stroke="none"/>'+
+    '<path d="'+line+'" fill="none" style="stroke:var(--accent);stroke-width:1.8;stroke-linejoin:round"/>';
+
+  var peak=0;
+  for(i=0;i<s.length;i++) if(s[i].v>peak) peak=s[i].v;
+  $('#rPeak').textContent='最高 '+peak;
+}
+
+/* ===================== 载入文本 ===================== */
+function loadText(text,src,label){
+  var t=String(text==null?'':text);
+  if(!t.replace(/[\s\u00a0]+/g,'').length){ toast('文本为空'); return; }
+  S.origin=t;
+  S.source=src||null;
+  S.sLabel=label||(src&&src.label)||'自定义文本';
+  S.mode=detectMode(t);
+  S.raw=normalize(t,S.mode);
+  buildDom();
+  resetRun();
+  syncSourceChips();
+  requestAnimationFrame(updateCaret);
+}
+
+function reload(){
+  if(S.origin) loadText(S.origin,S.source,S.sLabel);
+}
+
+function resetRun(){
+  stopTimer();
+  S.typed='';
+  S.keys=0; S.errs=0; S.correct=0;
+  S.startAt=0; S.pauseAt=0; S.paused=false; S.finished=false;
+  S.samples=[]; S.elapsed=0;
+  lastTick=0;
+  ta.value='';
+  hidePending();
+  hideResult();
+  stage.classList.remove('blurred');
+  paint();
+  updateStats();
+  setProgress(0);
+}
+
+/* ===================== 素材选择 ===================== */
+var lastIdx={};
+
+function pickItem(src){
+  var items=src.items, idx=0;
+  if(items.length>1){
+    idx=Math.floor(Math.random()*items.length);
+    if(idx===lastIdx[src.id]) idx=(idx+1)%items.length;
+  }
+  lastIdx[src.id]=idx;
+  return items[idx];
+}
+
+function syncSourceChips(){
+  $$('#srcRow .src').forEach(function(b){
+    var id=b.getAttribute('data-src');
+    var on=!!(S.source&&S.source.id===id);
+    b.setAttribute('aria-pressed',on?'true':'false');
+  });
+  $('#btnCustom').setAttribute('aria-pressed',(S.source&&S.source.id==='custom')?'true':'false');
+}
+
+/* ===================== 面板 ===================== */
+function openSheet(name){
+  openSheetName=name;
+  scrim.classList.add('on');
+  var el=$('#'+name);
+  el.classList.add('on');
+  el.setAttribute('aria-hidden','false');
+  ta.blur();
+  if(name==='sheetText'){
+    $('#customTa').focus();
+    updateCustomCount();
+  }
+  if(name==='sheetHist') renderHist();
+}
+
+function closeSheets(){
+  $$('.sheet').forEach(function(s){
+    s.classList.remove('on');
+    s.setAttribute('aria-hidden','true');
+  });
+  scrim.classList.remove('on');
+  openSheetName=null;
+  if(!$('#result').classList.contains('on')) scrim.classList.remove('on');
+}
+
+/* ===================== 自定义文本 ===================== */
+function updateCustomCount(){
+  var v=$('#customTa').value, n=v.replace(/[\s\u00a0]/g,'').length;
+  $('#customCount').textContent=n+' 字';
+}
+
+function renderSaved(){
+  var box=$('#savedList');
+  box.innerHTML='';
+  if(!savedTexts.length){
+    var empty=document.createElement('div');
+    empty.className='empty';
+    empty.textContent='还没有保存的素材。写好内容后点「存为素材」，下次可以直接调出来练。';
+    box.appendChild(empty);
+    return;
+  }
+  savedTexts.forEach(function(item,idx){
+    var row=document.createElement('div');
+    row.className='saved-item';
+
+    var nm=document.createElement('button');
+    nm.className='nm';
+    nm.type='button';
+    nm.style.cssText='border:0;background:transparent;text-align:left;font:inherit;color:inherit;padding:0;min-height:30px';
+    nm.textContent=item.name;
+    nm.title='点击载入';
+    nm.addEventListener('click',function(){
+      $('#customTa').value=item.text;
+      updateCustomCount();
+      toast('已载入：'+item.name);
+    });
+
+    var del=document.createElement('button');
+    del.className='del';
+    del.type='button';
+    del.setAttribute('aria-label','删除');
+    del.innerHTML='<svg viewBox="0 0 16 16"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9"/></svg>';
+    del.addEventListener('click',function(){
+      savedTexts.splice(idx,1);
+      store.set(KEY.texts,savedTexts);
+      renderSaved();
+      toast('已删除');
+    });
+
+    row.appendChild(nm);
+    row.appendChild(del);
+    box.appendChild(row);
+  });
+}
+
+/* ===================== 记录 ===================== */
+function fmtDate(ts){
+  var d=new Date(ts);
+  var p=function(n){return (n<10?'0':'')+n;};
+  return (d.getMonth()+1)+'/'+d.getDate()+' '+p(d.getHours())+':'+p(d.getMinutes());
+}
+
+function renderHist(){
+  var body=$('#histBody');
+  body.innerHTML='';
+  $('#histSub').textContent='最近 '+history.length+' 次';
+  if(!history.length){
+    var empty=document.createElement('div');
+    empty.className='empty';
+    empty.textContent='还没有记录。完成一次练习后，成绩会自动记在这里。';
+    body.appendChild(empty);
+    return;
+  }
+  var best={},i;
+  for(i=0;i<history.length;i++){
+    var h=history[i];
+    if(!best[h.mode]||h.speed>best[h.mode]) best[h.mode]=h.speed;
+  }
+  for(i=0;i<history.length;i++){
+    var e=history[i];
+    var row=document.createElement('div');
+    row.className='hist-row';
+    var d=document.createElement('span');
+    d.className='d';
+    d.textContent=fmtDate(e.ts)+' · '+(e.label||'练习')+' · '+e.sec+'s';
+    var b=document.createElement('b');
+    b.textContent=String(e.speed);
+    var a=document.createElement('span');
+    a.className='a';
+    a.textContent=(e.mode==='cn'?'字/分':'WPM')+' · '+e.acc+'%';
+    row.appendChild(d); row.appendChild(b); row.appendChild(a);
+    body.appendChild(row);
+  }
+}
+
+/* ===================== 设置应用 ===================== */
+function applySettings(persist){
+  if(persist) store.set(KEY.set,settings);
+  $$('.mini-seg').forEach(function(seg){
+    var key=seg.getAttribute('data-key');
+    $$('button',seg).forEach(function(b){
+      var v=b.getAttribute('data-v');
+      var on=(key==='strict'||key==='sound') ? (String(settings[key]?'1':'0')===v) : (String(settings[key])===v);
+      b.setAttribute('aria-pressed',on?'true':'false');
+    });
+  });
+  flow.style.fontSize = settings.size==='big' ? 'clamp(20px,4.9vw,27px)' : '';
+  requestAnimationFrame(updateCaret);
+}
+
+function resolvedTheme(){
+  if(settings.theme==='auto'){
+    return (window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+  }
+  return settings.theme;
+}
+
+function applyTheme(){
+  var t=resolvedTheme();
+  document.documentElement.setAttribute('data-theme',t);
+  var icon=$('#icoTheme');
+  if(t==='dark'){
+    icon.innerHTML='<path d="M20.6 14.4A8.6 8.6 0 1 1 9.9 3.8 6.9 6.9 0 0 0 20.6 14.4Z"/>';
+  }else{
+    icon.innerHTML='<circle cx="12" cy="12" r="4.2"/><path d="M12 3v2.2M12 18.8v2.2M3 12h2.2M18.8 12h2.2M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8L5.6 18.4"/>';
+  }
+  requestAnimationFrame(updateCaret);
+}
+
+/* ===================== 声音 ===================== */
+var audioCtx=null;
+function keySound(){
+  if(!settings.sound) return;
+  try{
+    if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    var t=audioCtx.currentTime;
+    var o=audioCtx.createOscillator(), g=audioCtx.createGain();
+    o.type='square';
+    o.frequency.value=2100;
+    g.gain.setValueAtTime(0.0009,t);
+    g.gain.exponentialRampToValueAtTime(0.00005,t+0.035);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(t); o.stop(t+0.04);
+  }catch(e){}
+}
+
+/* ===================== 事件：计时条 ===================== */
+$$('#timeSeg button').forEach(function(b){
+  b.addEventListener('click',function(){
+    $$('#timeSeg button').forEach(function(x){x.setAttribute('aria-pressed','false');});
+    b.setAttribute('aria-pressed','true');
+    S.limit=parseInt(b.getAttribute('data-time'),10)||0;
+    resetRun();
+    ta.focus();
+  });
+});
+
+/* ===================== 事件：素材 ===================== */
+(function buildSources(){
+  var row=$('#srcRow');
+  SOURCES.forEach(function(src){
+    var b=document.createElement('button');
+    b.className='src';
+    b.type='button';
+    b.setAttribute('data-src',src.id);
+    b.setAttribute('aria-pressed','false');
+    b.textContent=src.label;
+    b.addEventListener('click',function(){
+      loadText(pickItem(src),src,src.label);
+      ta.focus();
+    });
+    row.appendChild(b);
+  });
+})();
+
+/* ===================== 事件：输入 ===================== */
+ta.addEventListener('compositionstart',function(){ composing=true; });
+
+ta.addEventListener('compositionupdate',function(){
+  if(composing&&ta.value.length>=S.typed.length) showPending(ta.value.slice(S.typed.length));
+});
+
+ta.addEventListener('compositionend',function(){
+  composing=false;
+  hidePending();
+  setTimeout(function(){ commit(ta.value); },0);
+});
+
+ta.addEventListener('input',function(e){
+  if(e.isComposing){
+    if(ta.value.length>=S.typed.length) showPending(ta.value.slice(S.typed.length));
+    return;
+  }
+  composing=false;
+  hidePending();
+  keySound();
+  commit(ta.value);
+});
+
+ta.addEventListener('paste',function(e){
+  e.preventDefault();
+  toast('练习区不能粘贴，请用「自定义文本」载入内容');
+});
+
+ta.addEventListener('drop',function(e){ e.preventDefault(); });
+
+ta.addEventListener('focus',function(){
+  if(S.paused&&S.startAt&&!S.finished){
+    S.startAt+=performance.now()-S.pauseAt;
+    S.paused=false;
+  }
+  stage.classList.remove('blurred');
+  requestAnimationFrame(updateCaret);
+  updateStats();
+});
+
+ta.addEventListener('blur',function(){
+  if(S.startAt&&!S.finished&&!S.paused){
+    S.paused=true;
+    S.pauseAt=performance.now();
+  }
+  if(S.typed.length>0&&!S.finished) stage.classList.add('blurred');
+});
+
+panel.addEventListener('mousedown',function(e){
+  if(e.target===ta) return;
+  e.preventDefault();
+  ta.focus();
+});
+
+window.addEventListener('resize',function(){
+  requestAnimationFrame(updateCaret);
+});
+
+/* ===================== 事件：按钮 ===================== */
+$('#btnRestart').addEventListener('click',function(){ resetRun(); ta.focus(); });
+$('#btnNext').addEventListener('click',function(){
+  if(S.source&&S.source.id==='custom'){ openSheet('sheetText'); }
+  else if(S.source){ loadText(pickItem(S.source),S.source,S.source.label); ta.focus(); }
+});
+
+$('#btnTheme').addEventListener('click',function(){
+  settings.theme = resolvedTheme()==='dark'?'light':'dark';
+  store.set(KEY.set,settings);
+  applyTheme();
+});
+
+$('#btnHistory').addEventListener('click',function(){ openSheet('sheetHist'); });
+$('#btnSettings').addEventListener('click',function(){ openSheet('sheetSet'); });
+$('#btnCustom').addEventListener('click',function(){ openSheet('sheetText'); });
+
+$$('[data-close]').forEach(function(b){
+  b.addEventListener('click',function(){ closeSheets(); });
+});
+scrim.addEventListener('click',function(){
+  if($('#result').classList.contains('on')){ hideResult(); return; }
+  closeSheets();
+});
+
+/* ===================== 事件：自定义文本 ===================== */
+$('#customTa').addEventListener('input',updateCustomCount);
+
+$('#btnStartCustom').addEventListener('click',function(){
+  var text=$('#customTa').value;
+  if(!text.replace(/[\s\u00a0]/g,'').length){ toast('请先粘贴或输入要练习的内容'); return; }
+  if(text.replace(/[\s\u00a0]/g,'').length>MAX_CHARS) toast('内容超过 '+MAX_CHARS+' 字，已截取前 '+MAX_CHARS+' 字');
+  loadText(text,{id:'custom',label:'自定义文本'},'自定义文本');
+  closeSheets();
+  ta.focus();
+});
+
+$('#btnSaveText').addEventListener('click',function(){
+  var text=$('#customTa').value;
+  if(!text.replace(/[\s\u00a0]/g,'').length){ toast('内容为空，无法保存'); return; }
+  var name=text.replace(/[\s\u00a0]+/g,' ').trim().slice(0,16);
+  savedTexts.unshift({name:name,text:text,ts:Date.now()});
+  if(savedTexts.length>20) savedTexts.length=20;
+  store.set(KEY.texts,savedTexts);
+  renderSaved();
+  toast('已保存到素材库');
+});
+
+$('#fileIn').addEventListener('change',function(e){
+  var f=e.target.files&&e.target.files[0];
+  if(!f) return;
+  var r=new FileReader();
+  r.onload=function(){
+    $('#customTa').value=String(r.result||'');
+    updateCustomCount();
+    toast('已导入 '+f.name);
+  };
+  r.readAsText(f,'utf-8');
+  e.target.value='';
+});
+
+/* ===================== 事件：设置 ===================== */
+$$('.mini-seg button').forEach(function(b){
+  b.addEventListener('click',function(){
+    var seg=b.parentNode, key=seg.getAttribute('data-key'), v=b.getAttribute('data-v');
+    if(key==='strict'||key==='sound'){
+      settings[key]=(v==='1');
+    }else{
+      settings[key]=v;
+    }
+    applySettings(true);
+    if(key==='forceMode') reload();
+  });
+});
+
+$('#btnClearHist').addEventListener('click',function(){
+  if(!history.length){ toast('暂无记录'); return; }
+  if(!window.confirm('确定清空全部练习记录？该操作无法撤销。')) return;
+  history.length=0;
+  store.set(KEY.hist,history);
+  renderHist();
+  toast('记录已清空');
+});
+
+/* ===================== 事件：结果 ===================== */
+$('#btnAgain').addEventListener('click',function(){ resetRun(); ta.focus(); });
+$('#btnOther').addEventListener('click',function(){
+  hideResult();
+  if(S.source&&S.source.id==='custom'){ openSheet('sheetText'); return; }
+  if(S.source){ loadText(pickItem(S.source),S.source,S.source.label); ta.focus(); }
+});
+$('#btnCloseResult').addEventListener('click',function(){ hideResult(); });
+
+/* ===================== 快捷键 ===================== */
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){
+    if($('#result').classList.contains('on')){ hideResult(); return; }
+    if(openSheetName){ closeSheets(); return; }
+    ta.blur();
+    return;
+  }
+  if(e.key==='Tab'){
+    var t=e.target;
+    if(t&&(t.tagName==='TEXTAREA'||t.tagName==='INPUT')&&t.id!=='ta') return;
+    if(openSheetName||$('#result').classList.contains('on')) return;
+    e.preventDefault();
+    resetRun();
+    ta.focus();
+  }
+});
+
+/* ===================== 启动 ===================== */
+(function init(){
+  applySettings(false);
+  applyTheme();
+  if(window.matchMedia){
+    var mq=window.matchMedia('(prefers-color-scheme: dark)');
+    if(mq.addEventListener) mq.addEventListener('change',function(){ if(settings.theme==='auto') applyTheme(); });
+  }
+  $$('#timeSeg button').forEach(function(b){
+    b.setAttribute('aria-pressed', ((parseInt(b.getAttribute('data-time'),10)||0)===S.limit)?'true':'false');
+  });
+  var first=SOURCES[0];
+  loadText(pickItem(first),first,first.label);
+  renderSaved();
+  setTimeout(function(){ ta.focus(); },120);
+})();
+
+})();
+</script>
+</body>
+</html>
