@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>字炼 · 自定义打字练习</title>
+<title>字炼 · 让每一次敲击，都更进一步</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232A5F57'/%3E%3Cpath d='M9 11h14M16 11v12M10 23h12' stroke='%23F4F6F1' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 *,*::before,*::after{box-sizing:border-box}
@@ -155,7 +155,7 @@ html[data-theme="dark"] .panel:focus-within{border-color:#3A473F}
   font-size:12.5px;color:var(--dim);pointer-events:none;
   opacity:0;transition:opacity .15s;white-space:nowrap;
 }
-.stage.blurred .veil{opacity:1}
+.stage.blurred .veil{opacity:1;pointer-events:auto;cursor:pointer}
 
 /* ---------- progress + stats ---------- */
 .progress{height:2px;background:var(--surface2);border-radius:2px;overflow:hidden}
@@ -301,6 +301,18 @@ textarea.input:focus{border-color:var(--accent)}
   .sheet{transition:none}
   .result{transition:none}
 }
+
+:root{--bg:#f5f5f0;--surface:#fffefa;--surface2:#eceee7;--ink:#243b34;--dim:#65776d;--faint:#7b887e;--line:#dce2d8;--accent:#326b50;--accent-soft:#e2eddf}
+html[data-theme="dark"]{--dim:#a0b3a6;--faint:#859b8c;--surface:#16221c;--bg:#101a15;--line:#32463a}
+body{background-image:radial-gradient(ellipse at 90% 0%,var(--accent-soft),transparent 60%)}
+.wrap{max-width:1140px;padding:32px 36px;gap:0;min-height:100vh}.top{padding-bottom:25px;border-bottom:1px solid var(--line)}
+.mark{font-family:var(--sans);font-size:27px;font-weight:750;letter-spacing:.08em}.tag{margin-left:14px;font-size:12px}.icon-btn{border-radius:50%;width:40px;height:40px;background:var(--surface)}
+.intro{display:flex;justify-content:space-between;align-items:end;padding:46px 0 34px;gap:20px}.eyebrow{font-size:10px;letter-spacing:.2em;color:var(--accent);font-weight:700}h1{font-size:clamp(27px,4vw,39px);letter-spacing:-.04em;line-height:1.5;margin:10px 0;font-weight:650}h1 em{font-style:normal;color:var(--accent)}.intro p{font-size:13px;color:var(--dim);margin:0}.daily{font-size:12px;color:var(--dim);white-space:nowrap;padding-bottom:6px}.daily-dot,.practice-head i{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-right:7px}
+.controls{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:18px 22px;gap:14px}.control-label{font-size:12px;color:var(--dim);margin-right:8px}.src{border-radius:8px;padding:7px 13px;border-color:transparent;background:var(--surface2)}.src.custom{margin-left:auto;border:1px dashed var(--accent);background:transparent;color:var(--accent)}.split{display:none}.seg{background:var(--surface2)}
+.practice-head{display:flex;justify-content:space-between;align-items:center;margin:28px 3px 12px;font-size:12px;color:var(--dim)}.practice-head b{color:var(--ink);font-weight:600;margin-right:14px}.text-button{border:0;background:transparent;color:var(--dim);cursor:pointer;padding:7px}.panel{border-radius:16px;padding:34px 36px;height:300px;background:var(--surface);box-shadow:0 8px 35px #203a2b05}.panel:focus-within{border-color:var(--accent)}.flow{font-size:23px;line-height:2.1}.flow.cn{font-size:25px;line-height:2.15;letter-spacing:.07em}.cmark{display:none}.ch.ok{color:var(--accent)}.ch.bad{text-decoration:underline;text-underline-offset:5px}.ch.cur{color:var(--ink)}.progress{height:4px;margin:15px 8px 0}.board{margin:20px 0;padding:22px 24px;background:var(--surface);border:1px solid var(--line);border-radius:14px;align-items:center}.stat{position:relative;flex-wrap:wrap;gap:5px}.stat label{width:100%;font-size:11px;margin-bottom:5px}.stat b{font-size:28px;font-weight:500}.stat i{color:var(--dim)}.btn{border-radius:8px;min-height:42px}.actions #btnNext{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}.hint{display:flex;justify-content:space-between;gap:14px;font-size:11px}.hint-gap{margin:0 10px}kbd{font:10px var(--mono);padding:3px 5px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}button:focus-visible,label.btn:focus-visible{outline:3px solid var(--accent);outline-offset:3px}.sheet:not(.on),.result:not(.on){visibility:hidden}.sheet{border-radius:18px}.result{border-radius:20px;padding:30px}.r-speed b{font-size:60px}.toast{border-radius:10px}.focus-mode .intro,.focus-mode .controls,.focus-mode .top,.focus-mode .hint{display:none}.focus-mode .wrap{justify-content:center}.focus-mode .panel{height:48vh}.focus-mode .practice-head{margin-top:0}
+@media(min-width:768px){.sheet{width:480px;right:50%;bottom:auto;top:50%;transform:translate(50%,100vh);max-height:85vh}.sheet.on{transform:translate(50%,-50%)}}
+@media(max-width:767px){.wrap{padding:20px 18px}.intro{padding:30px 0 24px}.daily{display:none}.tag{font-size:10px;margin-left:0}.brand{gap:8px}.tools{gap:5px}.icon-btn{width:34px;height:34px}.controls{padding:14px;gap:10px}.control-label{width:100%}.ctrl-row{gap:6px}.seg button{padding:6px 8px;font-size:12px}.src.custom{margin-left:0}.panel{padding:22px;height:310px}.flow.cn{font-size:22px}.board{padding:18px;align-items:stretch}.stats{gap:18px}.board>.actions{margin-top:8px}.board>.actions .btn{flex:1}.hint{flex-direction:column;gap:10px}.practice-head{margin-top:22px}.sheet{padding:22px 18px}.row{flex-wrap:wrap}.intro h1 em{display:block}.split{display:none}}
+
 </style>
 </head>
 <body>
@@ -308,7 +320,7 @@ textarea.input:focus{border-color:var(--accent)}
   <header class="top">
     <div class="brand">
       <span class="mark">字炼</span>
-      <span class="tag">打字练习 · 自定义文本</span>
+      <span class="tag">专注敲击，慢慢进步。</span>
     </div>
     <div class="tools">
       <button class="icon-btn" id="btnTheme" title="切换浅色 / 深色" aria-label="切换主题">
@@ -323,8 +335,9 @@ textarea.input:focus{border-color:var(--accent)}
     </div>
   </header>
 
+  <section class="intro"><div><span class="eyebrow">YOUR DAILY TYPING RITUAL</span><h1>指尖有节奏，<em>进步有回响。</em></h1><p>选一段喜欢的文字，从第一次敲击开始。先准确，再快一点。</p></div><div class="daily"><span class="daily-dot"></span> 每天几分钟，找回专注</div></section>
   <section class="controls">
-    <div class="ctrl-row">
+    <div class="ctrl-row"><span class="control-label">练习时长</span>
       <div class="seg" id="timeSeg" role="group" aria-label="练习时长">
         <button data-time="0">不限时</button>
         <button data-time="15">15 秒</button>
@@ -338,6 +351,7 @@ textarea.input:focus{border-color:var(--accent)}
     <div class="ctrl-row" id="srcRow" role="group" aria-label="练习素材"></div>
   </section>
 
+  <div class="practice-head"><span><i></i> <b id="practiceLabel">中文短文</b> <span id="practiceState">准备就绪</span></span><button class="text-button" id="btnFocus">专注模式 ↗</button></div>
   <main class="stage" id="stage">
     <div class="panel" id="panel">
       <div class="flow" id="flow"></div>
@@ -373,13 +387,13 @@ textarea.input:focus{border-color:var(--accent)}
     </div>
   </section>
 
-  <footer class="hint">Tab 重新开始 · 单击文本区域聚焦 · 自定义文本支持粘贴与导入 .txt · 练习记录保存在本机</footer>
+  <footer class="hint"><span><kbd>Ctrl</kbd> + <kbd>Enter</kbd> 重新开始 <span class="hint-gap">·</span> <kbd>Esc</kbd> 暂停 / 退出专注</span><span>本地保存 · 无需登录 · 支持导入 .txt</span></footer>
 </div>
 
 <div class="scrim" id="scrim"></div>
 
 <!-- ===== 面板：自定义文本 ===== -->
-<section class="sheet" id="sheetText" aria-hidden="true">
+<section role="dialog" aria-modal="true" class="sheet" id="sheetText" aria-hidden="true">
   <div class="sheet-head">
     <div>
       <h2>自定义文本</h2>
@@ -411,7 +425,7 @@ textarea.input:focus{border-color:var(--accent)}
 </section>
 
 <!-- ===== 面板：设置 ===== -->
-<section class="sheet" id="sheetSet" aria-hidden="true">
+<section role="dialog" aria-modal="true" class="sheet" id="sheetSet" aria-hidden="true">
   <div class="sheet-head">
     <div>
       <h2>设置</h2>
@@ -455,7 +469,7 @@ textarea.input:focus{border-color:var(--accent)}
 </section>
 
 <!-- ===== 面板：记录 ===== -->
-<section class="sheet" id="sheetHist" aria-hidden="true">
+<section role="dialog" aria-modal="true" class="sheet" id="sheetHist" aria-hidden="true">
   <div class="sheet-head">
     <div>
       <h2>练习记录</h2>
@@ -487,7 +501,7 @@ textarea.input:focus{border-color:var(--accent)}
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (function(){
@@ -554,6 +568,7 @@ var S={
   startAt:0, pauseAt:0, paused:false, finished:false,
   limit:60, samples:[], elapsed:0
 };
+var returnFocus=null;
 var charSpans=[], timerId=null, lastTick=0, composing=false, openSheetName=null, toastTimer=null;
 
 /* ===================== 工具 ===================== */
@@ -696,6 +711,7 @@ function updateStats(){
   $('#sTimeUnit').textContent=S.limit>0?'秒余':'秒';
   $('#sCount').textContent=String(typed);
   $('#sTotal').textContent='/ '+total;
+  $('#practiceState').textContent=S.finished?'练习完成':S.paused?'已暂停':S.startAt?'正在练习':'点击文字，即可开始';
 }
 
 function setProgress(p){
@@ -732,7 +748,7 @@ function commit(v){
   if(v.length>target.length) v=v.slice(0,target.length);
 
   var base=0;
-  if(v.length>=prev.length && v.lastIndexOf(prev,0)===0) base=prev.length;
+  while(base<prev.length && base<v.length && prev.charAt(base)===v.charAt(base)) base++;
 
   var k=0, er=0;
   for(i=base;i<v.length;i++){
@@ -763,7 +779,7 @@ function commit(v){
   updateStats();
   setProgress(target.length?v.length/target.length:0);
 
-  if(S.correct+S.errs>=0 && v.length>=target.length) finish('done');
+  if(v.length>=target.length) finish('done');
 }
 
 function showPending(p){
@@ -844,6 +860,7 @@ function showResult(e,prevBest){
   drawChart();
   $('#result').classList.add('on');
   $('#result').setAttribute('aria-hidden','false');
+  $('#btnAgain').focus();
   scrim.classList.add('on');
 }
 
@@ -897,6 +914,7 @@ function loadText(text,src,label){
   S.origin=t;
   S.source=src||null;
   S.sLabel=label||(src&&src.label)||'自定义文本';
+  $('#practiceLabel').textContent=S.sLabel;
   S.mode=detectMode(t);
   S.raw=normalize(t,S.mode);
   buildDom();
@@ -949,6 +967,8 @@ function syncSourceChips(){
 
 /* ===================== 面板 ===================== */
 function openSheet(name){
+  returnFocus=document.activeElement;
+  closeSheets();
   openSheetName=name;
   scrim.classList.add('on');
   var el=$('#'+name);
@@ -960,6 +980,7 @@ function openSheet(name){
     updateCustomCount();
   }
   if(name==='sheetHist') renderHist();
+  if(name!=='sheetText') el.querySelector('button').focus();
 }
 
 function closeSheets(){
@@ -969,6 +990,7 @@ function closeSheets(){
   });
   scrim.classList.remove('on');
   openSheetName=null;
+  if(returnFocus && returnFocus.isConnected) returnFocus.focus();
   if(!$('#result').classList.contains('on')) scrim.classList.remove('on');
 }
 
@@ -1296,13 +1318,25 @@ $('#btnCloseResult').addEventListener('click',function(){ hideResult(); });
 
 /* ===================== 快捷键 ===================== */
 document.addEventListener('keydown',function(e){
+  if(e.key==='Tab'){
+    var active=$('#result').classList.contains('on')?$('#result'):openSheetName?$('#'+openSheetName):null;
+    if(active){
+      var controls=$$('button,textarea,input:not([hidden]),[tabindex="0"]',active).filter(function(el){return el.getClientRects().length;});
+      var first=controls[0],last=controls[controls.length-1];
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+    }
+  }
+
   if(e.key==='Escape'){
     if($('#result').classList.contains('on')){ hideResult(); return; }
     if(openSheetName){ closeSheets(); return; }
+    document.body.classList.remove('focus-mode');
+    $('#btnFocus').textContent='专注模式 ↗';
     ta.blur();
     return;
   }
-  if(e.key==='Tab'){
+  if(e.key==='Enter' && (e.ctrlKey||e.metaKey)){
     var t=e.target;
     if(t&&(t.tagName==='TEXTAREA'||t.tagName==='INPUT')&&t.id!=='ta') return;
     if(openSheetName||$('#result').classList.contains('on')) return;
@@ -1312,6 +1346,12 @@ document.addEventListener('keydown',function(e){
   }
 });
 
+$('#btnFocus').addEventListener('click',function(){
+  var on=document.body.classList.toggle('focus-mode');
+  this.textContent=on?'退出专注 ↙':'专注模式 ↗';
+  requestAnimationFrame(function(){ta.focus();updateCaret();});
+});
+$('#veil').addEventListener('click',function(){ta.focus();});
 /* ===================== 启动 ===================== */
 (function init(){
   applySettings(false);
